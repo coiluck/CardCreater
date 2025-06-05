@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カードクリエーター</title>
+    <meta name="discription" content="オリジナルのトレーディングカードを作成できます。画像、コスト、効果などを幅広く設定可能で、作成したカードはpngファイルでダウンロードできます。">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Smooch+Sans:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Reggae+One&display=swap" rel="stylesheet">
+    <link rel="icon" href="./favicon.ico">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .control-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .control-panel label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4A5568; /* text-gray-700 */
+        }
+        .control-panel input[type="text"],
+        .control-panel input[type="number"],
+        .control-panel input[type="color"],
+        .control-panel textarea,
+        .control-panel input[type="file"],
+        .control-panel input[type="checkbox"] { /* Added checkbox styling */
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #CBD5E0; /* border-gray-300 */
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .control-panel input[type="color"] {
+            height: 40px;
+        }
+        .control-panel input[type="checkbox"] { /* Specific style for checkbox */
+            width: auto; /* Override width for checkbox */
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .control-panel button {
+            background-color: #4299E1; /* bg-blue-500 */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-bottom: 8px; /* Added margin for multiple buttons */
+        }
+        .control-panel button:hover {
+            background-color: #3182CE; /* bg-blue-600 */
+        }
+        #cardCanvas {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background-color: #fff; /* Default canvas background if nothing is drawn */
+            width: 375px;
+            height: 525px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        @media (min-width: 768px) {
+            .grid-container {
+                grid-template-columns: 300px 1fr;
+            }
+        }
+        h1, h2 {
+            color: #2C5282; /* text-blue-800 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center mb-8">カードクリエーター</h1>
+
+        <div class="grid-container">
+            <div class="control-panel">
+                <h2 class="text-xl font-semibold mb-4">カード設定</h2>
+
+                <div>
+                    <label for="backgroundToggleInput" style="display:inline-block; margin-bottom: 10px;">
+                        <input type="checkbox" id="backgroundToggleInput">背景の不均一化を使用
+                    </label>
+                </div>
+
+                <div>
+                    <label for="attributeColorInput">属性カラー:</label>
+                    <input type="color" id="attributeColorInput" value="#008080">
+                </div>
+
+                <div>
+                    <label for="mainImageInput">メイン画像:</label>
+                    <input type="file" id="mainImageInput" accept="image/*">
+                </div>
+
+                <div>
+                    <label for="cardTitleInput">カードタイトル:</label>
+                    <input type="text" id="cardTitleInput" value="少女戦士 ココネ">
+                </div>
+                 <div>
+                    <label for="titleFontSizeInput">タイトル文字サイズ (px):</label>
+                    <input type="number" id="titleFontSizeInput" value="22">
+                </div>
+                <div>
+                    <label for="titleBgTypeButton">タイトル背景タイプ:</label>
+                    <button id="titleBgTypeButton" class="w-full">背景タイプ切替 (通常)</button>
+                </div>
+
+
+                <div>
+                    <label for="costInput">コスト:</label>
+                    <input type="number" id="costInput" value="6">
+                </div>
+                <div>
+                    <label for="costFontSizeInput">コスト文字サイズ (px):</label>
+                    <input type="number" id="costFontSizeInput" value="30">
+                </div>
+
+                <div>
+                    <label for="attributeTextInput">属性テキスト:</label>
+                    <input type="text" id="attributeTextInput" value="水">
+                </div>
+
+                <div>
+                    <label for="effectTextInput">効果テキスト (改行はEnterまたは&lt;br&gt;):</label>
+                    <textarea id="effectTextInput" rows="4">敵に燐の刻印を2つ付与。敵の燐の刻印を3つ消費して、敵に火傷効果（ターン開始時ダメージ4、3ターン持続）</textarea>
+                </div>
+
+                <div>
+                    <label for="flavorTextInput">フレーバーテキスト:</label>
+                    <input type="text" id="flavorTextInput" value="「偽りだって信じれば真実だよ」">
+                </div>
+
+                <div>
+                    <label for="cardIdInput">カードID:</label>
+                    <input type="text" id="cardIdInput" value="0001-KY-FF7F7E">
+                </div>
+
+                <div>
+                    <label for="showEngraveInput" style="display:inline-block; margin-bottom: 10px;">
+                        <input type="checkbox" id="showEngraveInput" checked>下部の表示
+                    </label>
+                </div>
+                <div>
+                    <label for="engraveTextInput">下部テキスト:</label>
+                    <input type="text" id="engraveTextInput" value="クリーチャー">
+                </div>
+
+
+                <button id="generateCardButton" class="w-full">カード生成</button>
+                <button id="downloadCardButton" class="w-full bg-green-500 hover:bg-green-600">カードをダウンロード</button>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-semibold mb-4 text-center md:text-left">プレビュー</h2>
+                <canvas id="cardCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('cardCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const CARD_WIDTH = 375 * 2;
+        const CARD_HEIGHT = 525 * 2;
+        canvas.width = CARD_WIDTH;
+        canvas.height = CARD_HEIGHT;
+
+        let paperImage = new Image();
+        paperImage.src = './paper.jpg'; // Load the background image from the local path
+        paperImage.onload = () => drawCard(); // Redraw once the image is loaded
+        paperImage.onerror = () => {
+            console.error("Failed to load background image './paper.jpg'. Please ensure the file exists.");
+            paperImage = null; // Set to null if loading fails
+            drawCard(); // Still draw the card without the background image
+        };
+        
+        let mainImage = null;
+        let currentTitleBgType = 0; // 0: Normal, 1: BaseColor Gradient, 2: BaseColor Fade
+
+        // const paperImageInput = document.getElementById('paperImageInput'); // Removed
+        const backgroundToggleInput = document.getElementById('backgroundToggleInput'); // New
+        const attributeColorInput = document.getElementById('attributeColorInput');
+        const mainImageInput = document.getElementById('mainImageInput');
+        const cardTitleInput = document.getElementById('cardTitleInput');
+        const titleFontSizeInput = document.getElementById('titleFontSizeInput');
+        const costInput = document.getElementById('costInput');
+        const costFontSizeInput = document.getElementById('costFontSizeInput');
+        const attributeTextInput = document.getElementById('attributeTextInput');
+        const effectTextInput = document.getElementById('effectTextInput');
+        const flavorTextInput = document.getElementById('flavorTextInput');
+        const cardIdInput = document.getElementById('cardIdInput');
+        const showEngraveInput = document.getElementById('showEngraveInput');
+        const engraveTextInput = document.getElementById('engraveTextInput');
+
+        const generateCardButton = document.getElementById('generateCardButton');
+        const downloadCardButton = document.getElementById('downloadCardButton');
+        const titleBgTypeButton = document.getElementById('titleBgTypeButton');
+
+        // paperImageInput.addEventListener('change', (e) => { // Removed
+        //     const file = e.target.files[0];
+        //     if (file) {
+        //         const reader = new FileReader();
+        //         reader.onload = (event) => {
+        //             paperImage = new Image();
+        //             paperImage.onload = () => drawCard();
+        //             paperImage.onerror = () => { paperImage = null; drawCard(); }
+        //             paperImage.src = event.target.result;
+        //         }
+        //         reader.readAsDataURL(file);
+        //     } else { paperImage = null; drawCard(); }
+        // });
+
+        mainImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    mainImage = new Image();
+                    mainImage.onload = () => drawCard();
+                    mainImage.onerror = () => { mainImage = null; drawCard(); }
+                    mainImage.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            } else { mainImage = null; drawCard(); }
+        });
+
+        titleBgTypeButton.addEventListener('click', () => {
+            currentTitleBgType = (currentTitleBgType + 1) % 3;
+            const bgTypeNames = ["通常", "標準色グラデ", "標準色フェード"];
+            titleBgTypeButton.textContent = `背景タイプ切替 (${bgTypeNames[currentTitleBgType]})`;
+            drawCard();
+        });
+
+        function hexToRgba(hex, alpha = 1) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function clamp(value, min = 0, max = 255) {
+            return Math.min(Math.max(value, min), max);
+        }
+
+        function getWrappedLines(context, text, maxWidth, font) {
+            const originalFont = context.font;
+            if (font) context.font = font;
+
+            const paragraphs = text.replace(/<br\s*\/?>/gi, '\n').split('\n');
+            const allLines = [];
+
+            for (const paragraph of paragraphs) {
+                if (paragraph.trim() === '') {
+                    allLines.push('');
+                    continue;
+                }
+                const words = paragraph.split(' ');
+                let currentLine = '';
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = currentLine + words[n] + ' ';
+                    const metrics = context.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        allLines.push(currentLine.trim());
+                        currentLine = words[n] + ' ';
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                if (currentLine.trim() !== '') {
+                    allLines.push(currentLine.trim());
+                }
+            }
+            if (font) context.font = originalFont;
+            return allLines;
+        }
+
+        function wrapText(context, text, x, y, maxWidth, lineHeight, textAlign = 'left') {
+            const originalCtxTextAlign = context.textAlign;
+            context.textAlign = textAlign;
+            context.textBaseline = 'top';
+
+            const paragraphs = text.replace(/<br\s*\/?>/gi, '\n').split('\n');
+            let currentY = y;
+
+            for (const paragraph of paragraphs) {
+                if (paragraph.trim() === '') {
+                    currentY += lineHeight;
+                    continue;
+                }
+                const words = paragraph.split(' ');
+                let line = '';
+
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    const metrics = context.measureText(testLine);
+                    const testWidth = metrics.width;
+
+                    if (testWidth > maxWidth && n > 0) {
+                        const lineToDraw = line.trim();
+                        let xForFillText;
+                        if (textAlign === 'left') {
+                            xForFillText = x;
+                        } else if (textAlign === 'center') {
+                            xForFillText = x + maxWidth / 2;
+                        } else { // right
+                            xForFillText = x + maxWidth;
+                        }
+                        context.fillText(lineToDraw, xForFillText, currentY);
+                        line = words[n] + ' ';
+                        currentY += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                if (line.trim() !== '') {
+                    const lineToDraw = line.trim();
+                    let xForFillText;
+                    if (textAlign === 'left') {
+                        xForFillText = x;
+                    } else if (textAlign === 'center') {
+                        xForFillText = x + maxWidth / 2;
+                    } else { // right
+                        xForFillText = x + maxWidth;
+                    }
+                    context.fillText(lineToDraw, xForFillText, currentY);
+                    currentY += lineHeight;
+                }
+            }
+            context.textAlign = originalCtxTextAlign;
+            return currentY;
+        }
+
+        function drawCard() {
+            ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+
+            const attributeColor = attributeColorInput.value;
+            const cardTitle = cardTitleInput.value;
+            const titleFontSize = parseInt(titleFontSizeInput.value) || 22;
+            const cost = costInput.value;
+            const costFontSize = parseInt(costFontSizeInput.value) || 22;
+            const attributeTextVal = attributeTextInput.value;
+            const effectText = effectTextInput.value;
+            const flavorText = flavorTextInput.value;
+            const cardId = cardIdInput.value;
+            const scale = 2;
+
+            // 1. Background
+            ctx.save();
+            if (backgroundToggleInput.checked && paperImage && paperImage.complete) { // Check the new toggle
+                ctx.drawImage(paperImage, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+                ctx.globalCompositeOperation = 'multiply';
+                const bgGradient = ctx.createLinearGradient(0, 0, 0, CARD_HEIGHT);
+                bgGradient.addColorStop(0, hexToRgba(attributeColor, 0.6));
+                bgGradient.addColorStop(0.5, hexToRgba(attributeColor, 0.4));
+                bgGradient.addColorStop(1, hexToRgba(attributeColor, 0.6));
+                ctx.fillStyle = bgGradient;
+                ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+                ctx.globalCompositeOperation = 'source-over';
+            } else {
+                const bgGradient = ctx.createLinearGradient(0, 0, 0, CARD_HEIGHT);
+                bgGradient.addColorStop(0, attributeColor);
+                bgGradient.addColorStop(1, hexToRgba(attributeColor, 0.7));
+                ctx.fillStyle = bgGradient;
+                ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+            }
+            ctx.restore();
+
+            // 2. Border
+            const borderWidth = 8 * scale;
+            ctx.save();
+            const borderGradient = ctx.createLinearGradient(0, 0, CARD_WIDTH, CARD_HEIGHT);
+            borderGradient.addColorStop(0, '#B87F33');
+            borderGradient.addColorStop(1, '#674F30');
+            ctx.strokeStyle = borderGradient;
+            ctx.lineWidth = borderWidth * 2;
+            ctx.strokeRect(0,0, CARD_WIDTH, CARD_HEIGHT);
+            ctx.restore();
+
+            const contentX = borderWidth;
+            const contentY = borderWidth;
+            const contentWidth = CARD_WIDTH - 2 * borderWidth;
+
+            // 3. Main Image & Frame
+            const mainImageMargin = 10 * scale;
+            const mainImageFrameColor = '#FFD700';
+            const mainImageFrameWidth = 3 * scale;
+            const mainImageTopAreaHeight = 60 * scale;
+            const mainImageY = contentY + mainImageTopAreaHeight;
+            const mainImageActualHeight = 200 * scale;
+
+
+            const mainImageX = contentX + mainImageMargin;
+            const mainImageW = contentWidth - 2 * mainImageMargin;
+            const mainImageH = mainImageActualHeight; // mainImageActualHeight is defined as 200 * scale
+
+            // Draw the Frame FIRST
+            ctx.fillStyle = mainImageFrameColor;
+            ctx.fillRect(
+                mainImageX - mainImageFrameWidth,
+                mainImageY - mainImageFrameWidth,
+                mainImageW + 2 * mainImageFrameWidth,
+                mainImageH + 2 * mainImageFrameWidth
+            );
+
+            // Draw Main Image or Placeholder
+            if (mainImage && mainImage.complete) {
+                ctx.save();
+                // Create a clipping path for the image area
+                // This ensures the image, even if drawn larger to cover, stays within bounds
+                ctx.beginPath();
+                ctx.rect(mainImageX, mainImageY, mainImageW, mainImageH);
+                ctx.clip();
+
+                // Calculate source rectangle (sx, sy, sWidth, sHeight) to achieve "cover"
+                let sx = 0, sy = 0, sWidth = mainImage.width, sHeight = mainImage.height;
+                const imgAspect = mainImage.width / mainImage.height;
+                const canvasAspect = mainImageW / mainImageH;
+
+                if (imgAspect > canvasAspect) {
+                    // Image is wider than the canvas area aspect ratio (image is landscape-like relative to container)
+                    // We need to crop the width of the source image
+                    sWidth = mainImage.height * canvasAspect; // Calculate source width to match canvas aspect ratio
+                    sx = (mainImage.width - sWidth) / 2;      // Center the crop horizontally
+                    // sy and sHeight remain as full height of the image
+                } else {
+                    // Image is taller than the canvas area aspect ratio (or same) (image is portrait-like relative to container)
+                    // We need to crop the height of the source image
+                    sHeight = mainImage.width / canvasAspect; // Calculate source height to match canvas aspect ratio
+                    sy = (mainImage.height - sHeight) / 2;      // Center the crop vertically
+                    // sx and sWidth remain as full width of the image
+                }
+                
+                // Draw the calculated portion of the source image to cover the destination rectangle
+                ctx.drawImage(mainImage, sx, sy, sWidth, sHeight, mainImageX, mainImageY, mainImageW, mainImageH);
+                
+                ctx.restore(); // Remove the clipping path
+            } else {
+                // Placeholder for when there is no main image or it's not loaded
+                ctx.fillStyle = '#cccccc'; // Placeholder background color
+                ctx.fillRect(mainImageX, mainImageY, mainImageW, mainImageH);
+                
+                ctx.fillStyle = '#555555'; // Placeholder text color
+                ctx.textAlign = 'center';  // Explicitly set for placeholder text
+                ctx.textBaseline = 'middle'; // Explicitly set for placeholder text
+                ctx.font = `${16 * scale}px Arial`;
+                ctx.fillText('メイン画像なし', mainImageX + mainImageW / 2, mainImageY + mainImageH / 2);
+            }
+
+
+            // 4. Card Title
+            const titleActualFontSize = titleFontSize * scale;
+            const titleYPos = contentY + (15 * scale);
+            ctx.font = `bold ${titleActualFontSize}px Arial`;
+            const titleTextMetrics = ctx.measureText(cardTitle);
+            const titleTextWidth = titleTextMetrics.width;
+            const titleXPos = contentX + contentWidth / 2;
+            const titleBgPadding = 10 * scale;
+
+            const titleBgX = titleXPos - titleTextWidth/2 - titleBgPadding;
+            const titleBgWidth = titleTextWidth + 2 * titleBgPadding;
+            const titleBgHeight = titleActualFontSize + (10 * scale);
+            const titleBgY = titleYPos;
+            const titleBgRadius = 5 * scale;
+
+            let titleFillStyle;
+            const baseTitleBgR = 0, baseTitleBgG = 0, baseTitleBgB = 0, baseTitleBgA = 0.5;
+
+            if (currentTitleBgType === 0) { // Normal
+                titleFillStyle = `rgba(${baseTitleBgR},${baseTitleBgG},${baseTitleBgB},${baseTitleBgA})`;
+            } else if (currentTitleBgType === 1) { // BaseColor Gradient
+                let r = baseTitleBgR, g = baseTitleBgG, b = baseTitleBgB;
+                let c1_r = r, c1_g = g, c1_b = b;
+                let c2_r = r, c2_g = g, c2_b = b;
+
+                if (r >= g && r >= b) {
+                    c1_g = clamp(g - 20); c1_b = clamp(b - 20);
+                    c2_g = clamp(g + 20); c2_b = clamp(b + 20);
+                } else if (g >= r && g >= b) {
+                    c1_r = clamp(r - 20); c1_b = clamp(b - 20);
+                    c2_r = clamp(r + 20); c2_b = clamp(b + 20);
+                } else {
+                    c1_r = clamp(r - 20); c1_g = clamp(g - 20);
+                    c2_r = clamp(r + 20); c2_g = clamp(g + 20);
+                }
+                const colorString1 = `rgba(${c1_r},${c1_g},${c1_b},${baseTitleBgA})`;
+                const colorString2 = `rgba(${c2_r},${c2_g},${c2_b},${baseTitleBgA})`;
+
+                const grad = ctx.createLinearGradient(titleBgX, titleBgY, titleBgX + titleBgWidth, titleBgY + titleBgHeight);
+                grad.addColorStop(0, colorString1);
+                grad.addColorStop(1, colorString2);
+                titleFillStyle = grad;
+            } else { // BaseColor Fade (currentTitleBgType === 2)
+                const grad = ctx.createLinearGradient(titleBgX, titleBgY, titleBgX + titleBgWidth, titleBgY);
+                grad.addColorStop(0, `rgba(${baseTitleBgR},${baseTitleBgG},${baseTitleBgB},0)`);
+                grad.addColorStop(0.5, `rgba(${baseTitleBgR},${baseTitleBgG},${baseTitleBgB},${baseTitleBgA})`);
+                grad.addColorStop(1, `rgba(${baseTitleBgR},${baseTitleBgG},${baseTitleBgB},0)`);
+                titleFillStyle = grad;
+            }
+            ctx.fillStyle = titleFillStyle;
+
+            ctx.beginPath();
+            ctx.moveTo(titleBgX + titleBgRadius, titleBgY);
+            ctx.lineTo(titleBgX + titleBgWidth - titleBgRadius, titleBgY);
+            ctx.quadraticCurveTo(titleBgX + titleBgWidth, titleBgY, titleBgX + titleBgWidth, titleBgY + titleBgRadius);
+            ctx.lineTo(titleBgX + titleBgWidth, titleBgY + titleBgHeight - titleBgRadius);
+            ctx.quadraticCurveTo(titleBgX + titleBgWidth, titleBgY + titleBgHeight, titleBgX + titleBgWidth - titleBgRadius, titleBgY + titleBgHeight);
+            ctx.lineTo(titleBgX + titleBgRadius, titleBgY + titleBgHeight);
+            ctx.quadraticCurveTo(titleBgX, titleBgY + titleBgHeight, titleBgX, titleBgY + titleBgHeight - titleBgRadius);
+            ctx.lineTo(titleBgX, titleBgY + titleBgRadius);
+            ctx.quadraticCurveTo(titleBgX, titleBgY, titleBgX + titleBgRadius, titleBgY);
+            ctx.closePath(); ctx.fill();
+
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(cardTitle, titleXPos, titleBgY + (titleBgHeight / 2));
+
+            // 5. Cost Icon
+            const costActualFontSize = costFontSize * scale;
+            const costIconRadius = 15 * scale;
+            const costIconOuterRadius = costIconRadius + (3 * scale);
+            const costIconX = contentX + (15 * scale) + costIconOuterRadius;
+            const costIconY = contentY + (mainImageTopAreaHeight / 2) - (2*scale) ;
+
+            const costGradient = ctx.createRadialGradient(
+                costIconX - costIconOuterRadius * 0.3, costIconY - costIconOuterRadius * 0.3, costIconOuterRadius * 0.1,
+                costIconX, costIconY, costIconOuterRadius
+            );
+            costGradient.addColorStop(0, 'rgba(255,255,255,0.9)');
+            costGradient.addColorStop(0.6, '#2B6CB0');
+            costGradient.addColorStop(1, '#1A4273');
+            ctx.fillStyle = costGradient;
+
+            ctx.beginPath();
+            ctx.arc(costIconX, costIconY, costIconOuterRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'gold';
+            ctx.lineWidth = 2 * scale;
+            ctx.stroke();
+
+            ctx.font = `700 ${costActualFontSize}px 'Smooch Sans', Arial`;
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+            ctx.shadowOffsetX = 1 * scale;
+            ctx.shadowOffsetY = 1 * scale;
+            ctx.shadowBlur = 2 * scale;
+            ctx.fillText(cost, costIconX, costIconY + (2*scale));
+            ctx.restore();
+
+            // 6. Attribute Text
+            const attributeBoxWidth = 50 * scale;
+            const attributeBoxHeight = 30 * scale;
+            const attributeX = contentX + contentWidth - attributeBoxWidth - (15 * scale);
+            const attributeY = contentY + (15 * scale);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            const attrRadius = 8 * scale;
+            ctx.beginPath();
+            ctx.moveTo(attributeX + attrRadius, attributeY);
+            ctx.lineTo(attributeX + attributeBoxWidth - attrRadius, attributeY);
+            ctx.quadraticCurveTo(attributeX + attributeBoxWidth, attributeY, attributeX + attributeBoxWidth, attributeY + attrRadius);
+            ctx.lineTo(attributeX + attributeBoxWidth, attributeY + attributeBoxHeight - attrRadius);
+            ctx.quadraticCurveTo(attributeX + attributeBoxWidth, attributeY + attributeBoxHeight, attributeX + attributeBoxWidth - attrRadius, attributeY + attributeBoxHeight);
+            ctx.lineTo(attributeX + attrRadius, attributeY + attributeBoxHeight);
+            ctx.quadraticCurveTo(attributeX, attributeY + attributeBoxHeight, attributeX, attributeY + attributeBoxHeight - attrRadius);
+            ctx.lineTo(attributeX, attributeY + attrRadius);
+            ctx.quadraticCurveTo(attributeX, attributeY, attributeX + attrRadius, attributeY);
+            ctx.closePath(); ctx.fill();
+
+            ctx.font = `${18 * scale}px 'Reggae One', Arial`;
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(attributeTextVal, attributeX + attributeBoxWidth / 2, attributeY + attributeBoxHeight / 2);
+
+            // --- Dynamic Effect & Flavor Text Box ---
+            const effectBoxMargin = 10 * scale;
+            const effectBoxPadding = 10 * scale;
+            const effectBoxY = mainImageY + mainImageH + mainImageFrameWidth + (15 * scale);
+            const effectBoxX = contentX + effectBoxMargin;
+            const effectBoxWidth = contentWidth - 2 * effectBoxMargin;
+            const effectBoxMinHeight = 100 * scale;
+            const effectTextLineHeight = 18 * scale;
+            const flavorTextLineHeight = 16 * scale;
+
+            let combinedTextHeight = 0;
+            ctx.font = `${14 * scale}px Arial`; // For effect text measuring
+            const effectLines = getWrappedLines(ctx, effectText, effectBoxWidth - 2 * effectBoxPadding, ctx.font);
+            combinedTextHeight += effectLines.length * effectTextLineHeight;
+
+            if (flavorText) {
+                combinedTextHeight += (10 * scale); // Space before separator
+                combinedTextHeight += (10 * scale);  // Space after separator (MODIFIED from 5 to 10)
+                ctx.font = `italic ${13 * scale}px Arial`; // For flavor text measuring
+                const flavorLines = getWrappedLines(ctx, flavorText, effectBoxWidth - 2 * effectBoxPadding, ctx.font);
+                combinedTextHeight += flavorLines.length * flavorTextLineHeight;
+            }
+
+            const actualContentHeight = combinedTextHeight;
+            const dynamicEffectBoxHeight = Math.max(effectBoxMinHeight, actualContentHeight + (effectBoxPadding * 2));
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.strokeStyle = mainImageFrameColor;
+            ctx.lineWidth = 3 * scale;
+            const boxRadius = 10 * scale;
+            ctx.beginPath();
+            ctx.moveTo(effectBoxX + boxRadius, effectBoxY);
+            ctx.lineTo(effectBoxX + effectBoxWidth - boxRadius, effectBoxY);
+            ctx.quadraticCurveTo(effectBoxX + effectBoxWidth, effectBoxY, effectBoxX + effectBoxWidth, effectBoxY + boxRadius);
+            ctx.lineTo(effectBoxX + effectBoxWidth, effectBoxY + dynamicEffectBoxHeight - boxRadius);
+            ctx.quadraticCurveTo(effectBoxX + effectBoxWidth, effectBoxY + dynamicEffectBoxHeight, effectBoxX + effectBoxWidth - boxRadius, effectBoxY + dynamicEffectBoxHeight);
+            ctx.lineTo(effectBoxX + boxRadius, effectBoxY + dynamicEffectBoxHeight);
+            ctx.quadraticCurveTo(effectBoxX, effectBoxY + dynamicEffectBoxHeight, effectBoxX, effectBoxY + dynamicEffectBoxHeight - boxRadius);
+            ctx.lineTo(effectBoxX, effectBoxY + boxRadius);
+            ctx.quadraticCurveTo(effectBoxX, effectBoxY, effectBoxX + boxRadius, effectBoxY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.font = `${14 * scale}px Arial`;
+            ctx.fillStyle = '#333333';
+            let currentTextY = effectBoxY + effectBoxPadding;
+            currentTextY = wrapText(ctx, effectText, effectBoxX + effectBoxPadding, currentTextY, effectBoxWidth - 2 * effectBoxPadding, effectTextLineHeight, 'left');
+
+            if (flavorText) {
+                currentTextY += (10 * scale); // Space before separator
+
+                ctx.beginPath();
+                ctx.moveTo(effectBoxX + effectBoxPadding, currentTextY);
+                ctx.lineTo(effectBoxX + effectBoxWidth - effectBoxPadding, currentTextY);
+                ctx.strokeStyle = '#aaaaaa';
+                ctx.lineWidth = 1 * scale;
+                ctx.stroke();
+
+                currentTextY += (10 * scale); // Space after separator (MODIFIED from 5 to 10)
+                ctx.font = `italic ${13 * scale}px Arial`;
+                ctx.fillStyle = '#555555';
+                wrapText(
+                    ctx,
+                    flavorText,
+                    effectBoxX + effectBoxPadding,
+                    currentTextY,
+                    effectBoxWidth - 2 * effectBoxPadding,
+                    flavorTextLineHeight,
+                    'right'
+                );
+            }
+
+            // 8. Card ID
+            const cardIdTextSize = 10 * scale;
+            ctx.font = `${cardIdTextSize}px Arial`;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            const cardIdY = CARD_HEIGHT - borderWidth - (5 * scale);
+            ctx.fillText(cardId, contentX + (5 * scale), cardIdY);
+
+            // 9. Engrave Text
+            if (showEngraveInput.checked) {
+                const engraveText = engraveTextInput.value;
+                const engraveFontSize = 16 * scale;
+    
+                // 三角形の設定
+                const triangleWidth = 120 * scale;
+                const triangleHeight = 40 * scale;
+                const triangleX = CARD_WIDTH / 2;
+                const triangleY = CARD_HEIGHT - borderWidth
+    
+                // 三角形を描画（カードタイトルと同じ背景色を使用）
+                ctx.save();
+                ctx.globalCompositeOperation = 'source-over'; // 確実に前面に描画
+                ctx.fillStyle = titleFillStyle; // カードタイトルで使用した背景色と同じ
+                ctx.beginPath();
+                ctx.moveTo(triangleX, triangleY - triangleHeight); // 頂点（上）
+                ctx.lineTo(triangleX - triangleWidth / 2, triangleY); // 左下
+                ctx.lineTo(triangleX + triangleWidth / 2, triangleY); // 右下
+                ctx.closePath();
+                ctx.fill();
+    
+                // テキストを三角形の中央に配置
+                ctx.font = `${engraveFontSize}px 'Reggae One', Arial`;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+    
+                const textY = triangleY - triangleHeight / 2 + 4 * scale; // ここの足し算以降をいじれば文字の位置変わる
+                ctx.fillText(engraveText, triangleX, textY);
+                ctx.restore();
+            }
+        }
+
+        generateCardButton.addEventListener('click', drawCard);
+        downloadCardButton.addEventListener('click', () => {
+            const dataURL = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = (cardTitleInput.value.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'custom_card') + '.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        [attributeColorInput, cardTitleInput, titleFontSizeInput, costInput, costFontSizeInput, attributeTextInput, effectTextInput, flavorTextInput, cardIdInput, engraveTextInput, showEngraveInput, backgroundToggleInput].forEach(input => {
+            input.addEventListener('input', drawCard); // 'change' for checkbox is also fine, 'input' might be more responsive for text fields
+        });
+        showEngraveInput.addEventListener('change', drawCard); // Explicitly use 'change' for checkbox for wider compatibility
+        backgroundToggleInput.addEventListener('change', drawCard); // Explicitly use 'change' for checkbox for wider compatibility
+
+        // Initial draw
+        drawCard();
+    </script>
+</body>
+</html>
