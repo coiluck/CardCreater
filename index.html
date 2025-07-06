@@ -278,22 +278,23 @@
                 if (paragraph.trim() === '') {
                     allLines.push('');
                     continue;
+                    _DONE
                 }
-                const words = paragraph.split(' ');
+                // 単語単位ではなく文字単位で分割・評価する
+                const chars = paragraph.split('');
                 let currentLine = '';
-                for (let n = 0; n < words.length; n++) {
-                    const testLine = currentLine + words[n] + ' ';
+                for (let i = 0; i < chars.length; i++) {
+                    const testLine = currentLine + chars[i];
                     const metrics = context.measureText(testLine);
-                    const testWidth = metrics.width;
-                    if (testWidth > maxWidth && n > 0) {
-                        allLines.push(currentLine.trim());
-                        currentLine = words[n] + ' ';
+                    if (metrics.width > maxWidth && i > 0) {
+                        allLines.push(currentLine);
+                        currentLine = chars[i];
                     } else {
                         currentLine = testLine;
                     }
                 }
-                if (currentLine.trim() !== '') {
-                    allLines.push(currentLine.trim());
+                if (currentLine !== '') {
+                    allLines.push(currentLine);
                 }
             }
             if (font) context.font = originalFont;
@@ -313,16 +314,17 @@
                     currentY += lineHeight;
                     continue;
                 }
-                const words = paragraph.split(' ');
+                // 単語単位ではなく文字単位で分割・評価する
+                const chars = paragraph.split('');
                 let line = '';
 
-                for (let n = 0; n < words.length; n++) {
-                    const testLine = line + words[n] + ' ';
+                for (let n = 0; n < chars.length; n++) {
+                    const testLine = line + chars[n];
                     const metrics = context.measureText(testLine);
                     const testWidth = metrics.width;
 
                     if (testWidth > maxWidth && n > 0) {
-                        const lineToDraw = line.trim();
+                        const lineToDraw = line;
                         let xForFillText;
                         if (textAlign === 'left') {
                             xForFillText = x;
@@ -332,25 +334,25 @@
                             xForFillText = x + maxWidth;
                         }
                         context.fillText(lineToDraw, xForFillText, currentY);
-                        line = words[n] + ' ';
+                        line = chars[n];
                         currentY += lineHeight;
                     } else {
                         line = testLine;
                     }
                 }
-                if (line.trim() !== '') {
-                    const lineToDraw = line.trim();
+                if (line !== '') {
+                    const lineToDraw = line;
                     let xForFillText;
-                    if (textAlign === 'left') {
+                     if (textAlign === 'left') {
                         xForFillText = x;
                     } else if (textAlign === 'center') {
                         xForFillText = x + maxWidth / 2;
                     } else { // right
                         xForFillText = x + maxWidth;
                     }
-                    context.fillText(lineToDraw, xForFillText, currentY);
-                    currentY += lineHeight;
-                }
+                context.fillText(lineToDraw, xForFillText, currentY);
+                currentY += lineHeight;
+            }
             }
             context.textAlign = originalCtxTextAlign;
             return currentY;
@@ -374,7 +376,7 @@
             ctx.save();
             if (backgroundToggleInput.checked && paperImage && paperImage.complete) { // Check the new toggle
                 ctx.drawImage(paperImage, 0, 0, CARD_WIDTH, CARD_HEIGHT);
-                ctx.globalCompositeOperation = 'multiply';
+                ctx.globalCompositeOperation = 'multiply'; // overlay: 明るく multiply: 通常
                 const bgGradient = ctx.createLinearGradient(0, 0, 0, CARD_HEIGHT);
                 bgGradient.addColorStop(0, hexToRgba(attributeColor, 0.6));
                 bgGradient.addColorStop(0.5, hexToRgba(attributeColor, 0.4));
